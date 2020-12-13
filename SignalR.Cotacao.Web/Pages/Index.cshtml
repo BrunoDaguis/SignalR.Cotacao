@@ -1,0 +1,67 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<div id="tableCotacoes">
+    
+</div>
+
+@section Scripts{
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.1/signalr.min.js"></script>
+
+    <script>
+        var connection = new signalR.HubConnectionBuilder().withUrl("http://localhost:5000/hubs/cotacao").build();
+
+        async function start() {
+            try {
+                await connection.start();
+                console.log("SignalR Connected.");
+            } catch (err) {
+                console.log(err);
+                setTimeout(start, 5000);
+            }
+        };
+
+        connection.on("EnviarCotacao", function (cotacoes) {
+            
+            createTable(cotacoes);
+        });
+
+        start();
+
+        function createTable(cotacoes) {
+            var myTableDiv = document.getElementById("tableCotacoes");
+            myTableDiv.innerHTML = '';
+
+            var table = document.createElement('table');
+            table.border = '1';
+
+            var tableBody = document.createElement('TBODY');
+            table.appendChild(tableBody);
+
+            for (var i = 0; i < cotacoes.length; i++) {
+                var cotacao = cotacoes[i];
+
+                var tr = document.createElement('TR');
+                tableBody.appendChild(tr);
+
+                
+                var tdPapel = document.createElement('TD');
+                tdPapel.width = '75';
+                tdPapel.appendChild(document.createTextNode(cotacao.papel));
+
+                var tdValor = document.createElement('TD');
+                tdValor.width = '75';
+                tdValor.appendChild(document.createTextNode(cotacao.valor));
+
+                tr.appendChild(tdPapel);
+                tr.appendChild(tdValor);
+            }
+
+            myTableDiv.appendChild(table);
+        }
+
+    </script>
+}
